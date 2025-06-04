@@ -1,209 +1,209 @@
-# KAKURO CSP SOLVER
-## Constraint Satisfaction Problem Implementation with Chronological Backtracking
+# RESOLUTOR KAKURO CSP
+## Implementación de Problema de Satisfacción de Restricciones con Backtracking Cronológico
 
-### OVERVIEW
+### DESCRIPCIÓN GENERAL
 
-This project implements a complete Kakuro puzzle solver using advanced **Constraint Satisfaction Problem (CSP)** techniques with **Chronological Backtracking**. The system successfully solves complex Kakuro puzzles including those rated as "Very Difficult" difficulty level.
+Este proyecto implementa un resolutor completo de puzzles Kakuro utilizando técnicas avanzadas de **Problema de Satisfacción de Restricciones (CSP)** con **Backtracking Cronológico**. El sistema resuelve exitosamente puzzles complejos de Kakuro incluyendo aquellos clasificados como de dificultad "Muy Difícil".
 
 ---
 
-## CSP PROBLEM MODELING
+## MODELADO DEL PROBLEMA CSP
 
 ### Variables
-- **Definition**: Each empty cell in the Kakuro board represents a CSP variable
-- **Identification**: Variables are identified by their coordinates (x, y) on the board
-- **Scope**: The number of variables depends on the board size and complexity
+- **Definición**: Cada celda vacía en el tablero de Kakuro representa una variable CSP
+- **Identificación**: Las variables se identifican por sus coordenadas (x, y) en el tablero
+- **Alcance**: El número de variables depende del tamaño y complejidad del tablero
 
-### Domain
-- **Range**: Integer numbers from 1 to 9 (inclusive)
-- **Characteristics**: Finite and discrete domain
-- **Constraint**: Each variable can take exactly one value from this domain
+### Dominio
+- **Rango**: Números enteros del 1 al 9 (inclusive)
+- **Características**: Dominio finito y discreto
+- **Restricción**: Cada variable puede tomar exactamente un valor de este dominio
 
-### Constraints
+### Restricciones
 
-1. **Sum Constraints**:
-   - The sum of all variables in a segment must equal exactly the target value
-   - Mathematical formulation: Σ(xi) = target, where xi ∈ segment
+1. **Restricciones de Suma**:
+   - La suma de todas las variables en un segmento debe igualar exactamente el valor objetivo
+   - Formulación matemática: Σ(xi) = objetivo, donde xi ∈ segmento
 
-2. **Uniqueness Constraints**:
-   - No repeated values within the same segment
-   - Formulation: ∀i,j ∈ segment, i ≠ j → xi ≠ xj
+2. **Restricciones de Unicidad**:
+   - No puede haber valores repetidos dentro del mismo segmento
+   - Formulación: ∀i,j ∈ segmento, i ≠ j → xi ≠ xj
 
-3. **Domain Constraints**:
-   - Each variable must have a valid domain value
+3. **Restricciones de Dominio**:
+   - Cada variable debe tener un valor válido del dominio
    - 1 ≤ xi ≤ 9, ∀i
 
 ---
 
-## CSP RESOLUTION TECHNIQUES
+## TÉCNICAS DE RESOLUCIÓN CSP
 
-### 1. Chronological Backtracking
-- **Algorithm**: Systematic search with ordered backtrack
-- **Advantage**: Guarantees finding solution if one exists
-- **Optimization**: Intelligent pruning to reduce search space
+### 1. Backtracking Cronológico
+- **Algoritmo**: Búsqueda sistemática con retroceso ordenado
+- **Ventaja**: Garantiza encontrar solución si existe una
+- **Optimización**: Poda inteligente para reducir el espacio de búsqueda
 
-### 2. Constraint Propagation
-- **Forward Checking**: Verifies consistency before assigning values
-- **Arc Consistency**: Maintains consistency between related variables
-- **Early Detection**: Identifies inconsistencies before complete search
+### 2. Propagación de Restricciones
+- **Forward Checking**: Verifica consistencia antes de asignar valores
+- **Consistencia de Arco**: Mantiene consistencia entre variables relacionadas
+- **Detección Temprana**: Identifica inconsistencias antes de la búsqueda completa
 
-### 3. Variable Ordering Heuristics
-- **Most Constrained Variable**: Prioritizes variables with smallest available domain
-- **Least Constraining Value**: Selects values that least restrict other variables
-- **Degree Heuristic**: Considers variables with most constraints first
+### 3. Heurísticas de Ordenamiento de Variables
+- **Variable Más Restringida**: Prioriza variables con menor dominio disponible
+- **Valor Menos Restrictivo**: Selecciona valores que menos restringen otras variables
+- **Heurística de Grado**: Considera primero variables con más restricciones
 
-### 4. Performance Optimizations
-- **Memoization**: Caches results for repeated sum combinations
-- **Preprocessing**: Early generation of valid combinations
-- **Domain Pruning**: Early elimination of impossible values
+### 4. Optimizaciones de Rendimiento
+- **Memoización**: Almacena resultados para combinaciones de suma repetidas
+- **Preprocesamiento**: Generación temprana de combinaciones válidas
+- **Poda de Dominio**: Eliminación temprana de valores imposibles
 
 ---
 
-## SYSTEM ARCHITECTURE
+## ARQUITECTURA DEL SISTEMA
 
-### Core Classes
+### Clases Principales
 
-#### `Solver` Class
-**Primary CSP Controller**
-- **Responsibility**: Overall coordination of the resolution process
-- **Components**:
-  - Input format parser
-  - CSP data structure management
-  - Main algorithm controller
+#### Clase `Solver`
+**Controlador Principal del CSP**
+- **Responsabilidad**: Coordinación general del proceso de resolución
+- **Componentes**:
+  - Parser del formato de entrada
+  - Gestión de estructuras de datos CSP
+  - Controlador del algoritmo principal
 
 ```python
 class Solver(object):
     """
-    Main CSP implementation for Kakuro solving.
-    Manages variables, constraints, and the solving process.
+    Implementación principal del CSP para resolver Kakuro.
+    Gestiona variables, restricciones y el proceso de resolución.
     """
     
-    # CSP Data Structures:
-    horizontal_runs = {}    # Horizontal constraint mapping
-    vertical_runs = {}      # Vertical constraint mapping
-    solution = {}          # Current variable assignment
-    solutions = {}         # Solution set for uniqueness analysis
+    # Estructuras de Datos CSP:
+    horizontal_runs = {}    # Mapeo de restricciones horizontales
+    vertical_runs = {}      # Mapeo de restricciones verticales
+    solution = {}          # Asignación actual de variables
+    solutions = {}         # Conjunto de soluciones para análisis de unicidad
 ```
 
-#### `Run` Class
-**Individual Constraint Representation**
-- **Responsibility**: Represents individual constraints (segments)
-- **CSP Functions**:
-  - Valid domain calculation
-  - Consistency verification
-  - Constraint propagation
+#### Clase `Run`
+**Representación de Restricción Individual**
+- **Responsabilidad**: Representa restricciones individuales (segmentos)
+- **Funciones CSP**:
+  - Cálculo de dominio válido
+  - Verificación de consistencia
+  - Propagación de restricciones
 
 ```python
 class Run(object):
     """
-    Represents a single constraint in the CSP.
-    Each Run corresponds to a horizontal or vertical segment.
+    Representa una sola restricción en el CSP.
+    Cada Run corresponde a un segmento horizontal o vertical.
     """
     
     def get_digits(self):
-        """Calculate available domain for variables in this constraint"""
+        """Calcula el dominio disponible para variables en esta restricción"""
         
     def fill_cells(self):
-        """Apply constraint propagation and domain reduction"""
+        """Aplica propagación de restricciones y reducción de dominio"""
         
     def test_possibilities(self):
-        """Implement backtracking search for this constraint"""
+        """Implementa búsqueda con backtracking para esta restricción"""
 ```
 
-### CSP Support Functions
+### Funciones de Soporte CSP
 
-#### Domain Generation
+#### Generación de Dominio
 ```python
 @Memoize
 def get_sums(target, count):
     """
-    CONSTRAINT GENERATION: 
-    Generates all possible combinations that sum to target
-    with exactly 'count' coefficients.
+    GENERACIÓN DE RESTRICCIONES: 
+    Genera todas las combinaciones posibles que suman al objetivo
+    con exactamente 'count' coeficientes.
     
-    This implements dynamic constraint generation for the CSP.
+    Esto implementa generación dinámica de restricciones para el CSP.
     """
 
 @Memoize
 def get_unique_sums(target, count):
     """
-    DOMAIN OPTIMIZATION:
-    Returns unique combinations sorted in ascending order.
-    Reduces search space by eliminating equivalent permutations.
+    OPTIMIZACIÓN DE DOMINIO:
+    Retorna combinaciones únicas ordenadas ascendentemente.
+    Reduce el espacio de búsqueda eliminando permutaciones equivalentes.
     """
 ```
 
-#### Backtracking Support
+#### Soporte para Backtracking
 ```python
 def combinations(nums):
     """
-    ASSIGNMENT GENERATOR:
-    Generates all permutations of numbers in nums.
-    Used in backtracking to test different assignments.
+    GENERADOR DE ASIGNACIONES:
+    Genera todas las permutaciones de números en nums.
+    Usado en backtracking para probar diferentes asignaciones.
     """
 ```
 
 ---
 
-## CSP ALGORITHM FLOW
+## FLUJO DEL ALGORITMO CSP
 
-### 1. **Problem Setup Phase**
+### 1. **Fase de Configuración del Problema**
 ```python
-# Parse input and create CSP representation
+# Parsear entrada y crear representación CSP
 solver = Solver("puzzle.txt")
 
-# Variables: Empty cells (00) become CSP variables
-# Constraints: Segments with target sums become CSP constraints
-# Domain: Each variable can be assigned values 1-9
+# Variables: Celdas vacías (00) se convierten en variables CSP
+# Restricciones: Segmentos con sumas objetivo se convierten en restricciones CSP
+# Dominio: Cada variable puede ser asignada valores 1-9
 ```
 
-### 2. **Constraint Propagation Phase**
+### 2. **Fase de Propagación de Restricciones**
 ```python
-# For each constraint (Run):
+# Para cada restricción (Run):
 for run in self.unique_runs_h + self.unique_runs_v:
     current_filled += run.fill_cells()
     
-# Apply arc consistency and domain reduction
-# Detect early inconsistencies
-# Propagate forced assignments
+# Aplicar consistencia de arco y reducción de dominio
+# Detectar inconsistencias tempranas
+# Propagar asignaciones forzadas
 ```
 
-### 3. **Backtracking Search Phase**
+### 3. **Fase de Búsqueda con Backtracking**
 ```python
-# When propagation insufficient, use backtracking:
+# Cuando la propagación es insuficiente, usar backtracking:
 for run in constraints:
     if not run.test_possibilities(limit):
-        # Backtrack and try different assignment
+        # Retroceder y probar diferente asignación
         self.undo(last_assignment)
 ```
 
-### 4. **Solution Validation**
+### 4. **Validación de Solución**
 ```python
-# Verify complete and consistent assignment
+# Verificar asignación completa y consistente
 if len(self.solution) == len(self.horizontal_runs):
-    # Solution found and validated
+    # Solución encontrada y validada
     self.add_solution()
 ```
 
 ---
 
-## COMPUTATIONAL COMPLEXITY
+## COMPLEJIDAD COMPUTACIONAL
 
-### Theoretical Analysis
-- **Worst Case**: O(9^n) where n = number of variables
-- **Average Case**: Significantly lower due to pruning and propagation
-- **Space Complexity**: O(n×m) where m = maximum domain size
+### Análisis Teórico
+- **Caso Peor**: O(9^n) donde n = número de variables
+- **Caso Promedio**: Significativamente menor debido a poda y propagación
+- **Complejidad Espacial**: O(n×m) donde m = tamaño máximo de dominio
 
-### Applied Optimizations
-- **Exponential Reduction**: Memoization reduces recalculations
-- **Effective Pruning**: Propagation eliminates invalid branches early
-- **Smart Heuristics**: Intelligent ordering improves average time
+### Optimizaciones Aplicadas
+- **Reducción Exponencial**: Memoización reduce recálculos
+- **Poda Efectiva**: Propagación elimina ramas inválidas tempranamente
+- **Heurísticas Inteligentes**: Ordenamiento inteligente mejora tiempo promedio
 
 ---
 
-## INPUT FORMAT
+## FORMATO DE ENTRADA
 
-The system accepts text files with comma-separated values:
+El sistema acepta archivos de texto con valores separados por comas:
 
 ```
 XX,XX,17,00,00,XX,16,00
@@ -217,171 +217,171 @@ XX,XX,00,00,10,XX,XX,07
 XX,XX,00,00,00,00,XX,00
 ```
 
-**Format Legend:**
-- **XX**: Blocked cells (not variables)
-- **Numbers > 0**: Target values for segments (constraints)
-- **00**: Empty cells (CSP variables)
-- **Empty Line**: Separator between horizontal and vertical constraints
+**Leyenda del Formato:**
+- **XX**: Celdas bloqueadas (no son variables)
+- **Números > 0**: Valores objetivo para segmentos (restricciones)
+- **00**: Celdas vacías (variables CSP)
+- **Línea Vacía**: Separador entre restricciones horizontales y verticales
 
 ---
 
-## USAGE EXAMPLES
+## EJEMPLOS DE USO
 
-### Command Line Execution
+### Ejecución desde Línea de Comandos
 ```bash
-# Basic solving
+# Resolución básica
 python main.py kakuru1.txt
 
-# With debug information showing CSP steps
+# Con información de debug mostrando pasos CSP
 python main.py kakuru2.txt --debug
 
-# Different difficulty levels
+# Diferentes niveles de dificultad
 python main.py ProgIIIG1-Act08-567890-Board.txt
 ```
 
-### Programmatic Usage
+### Uso Programático
 ```python
 from main import solve_kakuro
 
-# Solve a puzzle file
+# Resolver un archivo de puzzle
 solve_kakuro("kakuru1.txt")
 
-# With detailed CSP debugging
+# Con debug detallado de CSP
 solve_kakuro("kakuru2.txt", debug=True)
 ```
 
 ---
 
-## INCLUDED PUZZLE FILES
+## ARCHIVOS DE PUZZLE INCLUIDOS
 
-### Test Puzzles with Varying Difficulty
+### Puzzles de Prueba con Dificultad Variada
 
-1. **kakuru1.txt** - Complex puzzle (12x14 grid)
-   - **Difficulty**: High
-   - **Variables**: ~50 empty cells
-   - **Constraints**: Multiple overlapping segments
+1. **kakuru1.txt** - Puzzle complejo (grilla 12x14)
+   - **Dificultad**: Alta
+   - **Variables**: ~50 celdas vacías
+   - **Restricciones**: Múltiples segmentos superpuestos
 
-2. **kakuru2.txt** - Advanced puzzle (12x14 grid)
-   - **Difficulty**: Very High
-   - **Variables**: ~60 empty cells
-   - **Constraints**: Complex constraint network
+2. **kakuru2.txt** - Puzzle avanzado (grilla 12x14)
+   - **Dificultad**: Muy Alta
+   - **Variables**: ~60 celdas vacías
+   - **Restricciones**: Red de restricciones compleja
 
-3. **ProgIIIG1-Act08-567890-Board.txt** - Challenging puzzle (8x7 grid)
-   - **Difficulty**: Hard
-   - **Variables**: ~25 empty cells
-   - **Constraints**: Tight constraint satisfaction
+3. **ProgIIIG1-Act08-567890-Board.txt** - Puzzle desafiante (grilla 8x7)
+   - **Dificultad**: Difícil
+   - **Variables**: ~25 celdas vacías
+   - **Restricciones**: Satisfacción de restricciones ajustada
 
-4. **ProgIIIG1-Act08-111213-Board.txt** - Expert puzzle (10x8 grid)
-   - **Difficulty**: Expert
-   - **Variables**: ~35 empty cells
-   - **Constraints**: Highly constrained problem
+4. **ProgIIIG1-Act08-111213-Board.txt** - Puzzle experto (grilla 10x8)
+   - **Dificultad**: Experto
+   - **Variables**: ~35 celdas vacías
+   - **Restricciones**: Problema altamente restringido
 
 ---
 
-## CSP IMPLEMENTATION DETAILS
+## DETALLES DE IMPLEMENTACIÓN CSP
 
-### Constraint Propagation Engine
+### Motor de Propagación de Restricciones
 ```python
 def fill_cells(self, test=False):
     """
-    Core CSP constraint propagation implementation.
+    Implementación central de propagación de restricciones CSP.
     
-    1. Calculate intersection of domains from crossing constraints
-    2. Apply arc consistency between horizontal/vertical runs
-    3. Detect and propagate singleton domains
-    4. Early detection of constraint violations
+    1. Calcular intersección de dominios de restricciones cruzadas
+    2. Aplicar consistencia de arco entre runs horizontales/verticales
+    3. Detectar y propagar dominios singleton
+    4. Detección temprana de violaciones de restricciones
     """
     
     for coord in self.coords:
         if coord not in self.solver.solution:
-            # Get domain intersection from crossing constraints
+            # Obtener intersección de dominio de restricciones cruzadas
             digits1, digits2 = self.get_digits()
             digits3, digits4 = self.intersect[coord].get_digits()
             common = digits3 & digits1
             
-            # Singleton domain - force assignment
+            # Dominio singleton - forzar asignación
             if len(common) == 1:
                 found = common.pop()
                 self.add_found(coord, found, test)
             
-            # Inconsistency detection
+            # Detección de inconsistencia
             elif len(common) == 0:
-                return -1  # Constraint violation
+                return -1  # Violación de restricción
 ```
 
-### Backtracking Implementation
+### Implementación de Backtracking
 ```python
 def _test(self, value_set):
     """
-    Chronological backtracking with constraint checking.
+    Backtracking cronológico con verificación de restricciones.
     
-    1. Try each possible assignment in value_set
-    2. Apply assignment and propagate constraints
-    3. Check for violations in intersecting constraints
-    4. Backtrack if inconsistency found
-    5. Continue search or record solution
+    1. Probar cada asignación posible en value_set
+    2. Aplicar asignación y propagar restricciones
+    3. Verificar violaciones en restricciones intersectantes
+    4. Retroceder si se encuentra inconsistencia
+    5. Continuar búsqueda o registrar solución
     """
     
     valid = []
     for values in value_set:
-        # Make tentative assignment
+        # Hacer asignación tentativa
         self.assign_values(values)
         
-        # Check constraint consistency
+        # Verificar consistencia de restricciones
         if not self.check_constraints():
             eliminated = True
         
-        # Keep valid assignments
+        # Mantener asignaciones válidas
         if not eliminated:
             valid.append(values)
             
-        # Backtrack
+        # Retroceder
         self.undo_assignment()
 ```
 
 ---
 
-## VALIDATION AND RESULTS
+## VALIDACIÓN Y RESULTADOS
 
-### Successfully Tested With:
-- ✅ **High complexity puzzles** (50+ variables)
-- ✅ **Multiple difficulty levels** (Easy to Expert)
-- ✅ **Solution uniqueness verification**
-- ✅ **Unsolvable puzzle detection**
-- ✅ **Performance optimization validation**
+### Probado Exitosamente Con:
+- ✅ **Puzzles de alta complejidad** (50+ variables)
+- ✅ **Múltiples niveles de dificultad** (Fácil a Experto)
+- ✅ **Verificación de unicidad de solución**
+- ✅ **Detección de puzzles sin solución**
+- ✅ **Validación de optimización de rendimiento**
 
-### Performance Metrics:
-- **Average solving time**: < 2 seconds for most puzzles
-- **Memory usage**: Optimized with memoization
-- **Success rate**: 100% on well-formed puzzles
-
----
-
-## TECHNICAL HIGHLIGHTS
-
-### CSP-Specific Optimizations
-1. **Intelligent Variable Ordering**: Most constrained variable heuristic
-2. **Domain Reduction**: Progressive elimination of impossible values
-3. **Constraint Propagation**: Forward checking and arc consistency
-4. **Early Termination**: Conflict detection before complete search
-5. **Memoization**: Caching for repeated subproblem solutions
-
-### Code Quality Features
-- **Comprehensive Documentation**: Every CSP technique explained
-- **Modular Design**: Separation of CSP components
-- **Error Handling**: Robust input validation and error recovery
-- **Performance Monitoring**: Debug mode for CSP step analysis
+### Métricas de Rendimiento:
+- **Tiempo promedio de resolución**: < 2 segundos para la mayoría de puzzles
+- **Uso de memoria**: Optimizado con memoización
+- **Tasa de éxito**: 100% en puzzles bien formados
 
 ---
 
-## CONCLUSION
+## CARACTERÍSTICAS TÉCNICAS DESTACADAS
 
-This implementation demonstrates the effectiveness of CSP techniques for solving complex combinatorial problems like Kakuro. The applied optimizations allow solving high-difficulty boards in reasonable time, validating the efficacy of the Chronological Backtracking approach with constraint propagation.
+### Optimizaciones Específicas de CSP
+1. **Ordenamiento Inteligente de Variables**: Heurística de variable más restringida
+2. **Reducción de Dominio**: Eliminación progresiva de valores imposibles
+3. **Propagación de Restricciones**: Forward checking y consistencia de arco
+4. **Terminación Temprana**: Detección de conflictos antes de búsqueda completa
+5. **Memoización**: Cache para soluciones de subproblemas repetidos
 
-The codebase serves as an excellent example of practical CSP application, showcasing how theoretical computer science concepts can be effectively implemented to solve real-world puzzles.
+### Características de Calidad del Código
+- **Documentación Integral**: Cada técnica CSP explicada
+- **Diseño Modular**: Separación de componentes CSP
+- **Manejo de Errores**: Validación robusta de entrada y recuperación de errores
+- **Monitoreo de Rendimiento**: Modo debug para análisis de pasos CSP
 
 ---
 
-**License**: MIT  
-**Language**: Python 3.x  
-**Dependencies**: Standard library only 
+## CONCLUSIÓN
+
+Esta implementación demuestra la efectividad de las técnicas CSP para resolver problemas combinatorios complejos como Kakuro. Las optimizaciones aplicadas permiten resolver tableros de alta dificultad en tiempo razonable, validando la eficacia del enfoque de Backtracking Cronológico con propagación de restricciones.
+
+El código base sirve como un excelente ejemplo de aplicación práctica de CSP, mostrando cómo los conceptos teóricos de ciencias de la computación pueden implementarse efectivamente para resolver puzzles del mundo real.
+
+---
+
+**Licencia**: MIT  
+**Lenguaje**: Python 3.x  
+**Dependencias**: Solo biblioteca estándar 
