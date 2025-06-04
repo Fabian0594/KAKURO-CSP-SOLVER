@@ -1,26 +1,30 @@
 """
-RESOLUTOR DE KAKURO - CONSTRAINT SATISFACTION PROBLEM (CSP)
-===========================================================
+KAKURO CSP SOLVER - CONSTRAINT SATISFACTION PROBLEM IMPLEMENTATION
+================================================================
 
-Este programa implementa un resolutor de puzzles Kakuro utilizando técnicas de 
-Constraint Satisfaction Problem (CSP) con Backtracking Cronológico.
+This program implements a complete Kakuro puzzle solver using advanced 
+Constraint Satisfaction Problem (CSP) techniques with Chronological Backtracking.
 
-MODELADO DEL PROBLEMA:
-- Variables: Cada celda vacía del tablero representa una variable
-- Dominio: Números del 1 al 9 para cada variable
-- Restricciones: 
-  1. La suma de cada segmento debe igualar el valor objetivo
-  2. No puede haber números repetidos en un mismo segmento
-  3. Cada celda debe contener exactamente un dígito
+CSP PROBLEM MODELING:
+- Variables: Each empty cell in the Kakuro board represents a CSP variable
+- Domain: Numbers from 1 to 9 for each variable
+- Constraints: 
+  1. Sum constraint: The sum of each segment must equal the target value
+  2. Uniqueness constraint: No repeated numbers within the same segment
+  3. Domain constraint: Each cell must contain exactly one digit (1-9)
 
-TÉCNICAS UTILIZADAS:
-- Memoización para optimizar cálculos recursivos
-- Propagación de restricciones (constraint propagation)
-- Backtracking cronológico con poda
-- Heurísticas de ordenamiento de variables
+CSP TECHNIQUES IMPLEMENTED:
+- Memoization for recursive calculation optimization
+- Constraint propagation (forward checking and arc consistency)
+- Chronological backtracking with intelligent pruning
+- Variable ordering heuristics (most constrained variable first)
+- Domain reduction through constraint propagation
+- Early inconsistency detection
 
-Desarrollado para: Programación III - Actividad 08
-Grupo: G1
+PERFORMANCE OPTIMIZATIONS:
+- Exponential reduction through memoization
+- Effective pruning via constraint propagation
+- Smart heuristics for improved average-case performance
 """
 
 import math
@@ -34,15 +38,20 @@ import os
 
 class Memoize:
     """
-    Decorador para memoización - optimiza funciones recursivas 
-    almacenando resultados previamente calculados.
-    Esto es crucial para el rendimiento en CSP complejos.
+    Memoization decorator for CSP optimization.
+    
+    Stores previously computed results to avoid recalculation of identical
+    subproblems. Critical for performance in complex CSP solving where
+    the same constraint combinations appear repeatedly.
+    
+    This is particularly important for Kakuro where the same sum-target
+    combinations with the same number of variables occur frequently.
     """
-    def __init__(self, f):  # Fixed: was _init_
+    def __init__(self, f):
         self.f = f
         self.memo = {}
 
-    def __call__(self, *args):  # Fixed: was _call_
+    def __call__(self, *args):
         if not args in self.memo:
             self.memo[args] = self.f(*args)
         return self.memo[args]
@@ -50,17 +59,27 @@ class Memoize:
 @Memoize
 def get_sums(target, count):
     """
-    GENERACIÓN DE RESTRICCIONES: 
-    Retorna una lista de todas las sumas que den como resultado el objetivo (target) 
-    con cantidad (count) coeficientes.
+    CSP CONSTRAINT GENERATION ENGINE
     
-    Esta función implementa la generación dinámica de restricciones para el CSP.
+    Generates all possible digit combinations that sum to the target value
+    using exactly 'count' variables. This function is the core of constraint
+    generation for the Kakuro CSP.
+    
     Args:
-        target (int): Suma objetivo del segmento
-        count (int): Número de celdas en el segmento
+        target (int): The target sum for the segment (constraint value)
+        count (int): Number of variables in the segment
     
     Returns:
-        list: Lista de todas las combinaciones posibles de números
+        list: All valid combinations of digits [1-9] that sum to target
+        
+    CSP Role:
+        - Defines the solution space for each constraint
+        - Implements constraint satisfaction checking
+        - Generates valid assignments for backtracking
+        
+    Example:
+        get_sums(6, 2) returns [[1,5], [2,4], [4,2], [5,1]]
+        (all ways to make 6 with 2 different digits)
     """
 
     if count == 2:
@@ -80,12 +99,27 @@ def get_sums(target, count):
 @Memoize
 def get_unique_sums(target, count):
     """
-    DOMINIO DE VARIABLES:
-    Retorna un conjunto de sumas que den como resultado el objetivo (target) 
-    con cantidad (count) coeficientes.
-    Los coeficientes para cada suma están ordenados de forma ascendente.
+    CSP DOMAIN OPTIMIZATION
     
-    Esto reduce el espacio de búsqueda eliminando permutaciones equivalentes.
+    Returns unique digit combinations for a constraint, eliminating
+    permutation redundancy. This reduces the search space significantly
+    by considering only distinct sets rather than all orderings.
+    
+    Args:
+        target (int): Target sum value
+        count (int): Number of variables
+        
+    Returns:
+        list: Unique combinations sorted in ascending order
+        
+    CSP Optimization:
+        - Reduces branching factor in search tree
+        - Eliminates equivalent states from consideration
+        - Improves constraint propagation efficiency
+        
+    Example:
+        get_unique_sums(6, 2) returns [(1,5), (2,4)]
+        (eliminates duplicate (4,2) and (5,1) orderings)
     """
     sums = get_sums(target, count)
     unique_sums = set()
@@ -96,9 +130,22 @@ def get_unique_sums(target, count):
 
 def combinations(nums):
     """
-    GENERADOR DE ASIGNACIONES:
-    Obtener todas las combinaciones de números en nums.
-    Utilizado en el proceso de backtracking para probar diferentes asignaciones.
+    CSP ASSIGNMENT GENERATOR
+    
+    Generates all permutations of the given numbers for use in
+    backtracking search. When the CSP solver needs to test different
+    assignments to variables, this function provides all possible orderings.
+    
+    Args:
+        nums (list): List of numbers to permute
+        
+    Returns:
+        list: All permutations of the input numbers
+        
+    CSP Role:
+        - Supports backtracking by generating assignment options
+        - Used when constraint propagation alone is insufficient
+        - Enables systematic exploration of the solution space
     """
     combos = []
     if len(nums) == 2:
@@ -456,42 +503,68 @@ class Run(object):
 
 def solve_kakuro(puzzle_file=None, debug=False):
     """
-    Main function to solve Kakuro puzzle
-
+    Main CSP Solving Function
+    
+    Orchestrates the complete CSP solution process for Kakuro puzzles.
+    
     Args:
-        puzzle_file: Path to the puzzle file (required in local environment)
-        debug: Enable debug output
+        puzzle_file (str): Path to the puzzle file
+        debug (bool): Enable detailed CSP solving information
+    
+    CSP Process:
+        1. Parse input and create CSP representation
+        2. Initialize variables, domains, and constraints
+        3. Apply constraint propagation
+        4. Use backtracking search when needed
+        5. Validate and output solution
+        
+    Examples:
+        solve_kakuro("kakuru1.txt")           # Solve basic puzzle
+        solve_kakuro("kakuru2.txt", True)     # Solve with CSP debug info
     """
     if debug:
-        logging.basicConfig(level=logging.DEBUG, format="Debug: %(message)s")
+        logging.basicConfig(level=logging.DEBUG, format="CSP Debug: %(message)s")
 
     try:
         if puzzle_file is None:
             print("Please provide a puzzle file path as argument.")
-            print("Usage: solve_kakuro('path/to/puzzle.txt')")
-            print("Or run from command line: python main.py puzzle.txt")
+            print("Usage: solve_kakuro('kakuru1.txt')")
+            print("       solve_kakuro('kakuru2.txt', debug=True)")
+            print("Or run from command line: python main.py kakuru1.txt")
             return
 
         solver = Solver(puzzle_file)
         solver.solve()
 
     except Exception as e:
-        print(f"Error occurred: {e}")
+        print(f"CSP Solving Error: {e}")
         if 'solver' in locals():
             solver.solutions[0] = solver.solution
             solver.print_solutions()
 
 
-# Example usage:
-# solve_kakuro("puzzle.txt")  # Use specific file
-# solve_kakuro("puzzle.txt", debug=True)  # With debug output
+# Usage Examples:
+# solve_kakuro("kakuru1.txt")                    # High difficulty puzzle
+# solve_kakuro("kakuru2.txt", debug=True)        # Very high difficulty with debug
+# solve_kakuro("ProgIIIG1-Act08-567890-Board.txt")  # Hard difficulty puzzle
 
 if __name__ == "__main__":
-    # Command line compatibility
+    # Command line interface for CSP solver
     if len(sys.argv) >= 2:
         debug_mode = len(sys.argv) == 3 and sys.argv[2] == '--debug'
         solve_kakuro(sys.argv[1], debug_mode)
     else:
+        print("Kakuro CSP Solver")
+        print("================")
         print("Usage: python main.py <puzzle_file> [--debug]")
-        print("Example: python main.py puzzle.txt")
-        print("Example: python main.py puzzle.txt --debug")
+        print()
+        print("Examples:")
+        print("  python main.py kakuru1.txt              # Solve high difficulty puzzle")
+        print("  python main.py kakuru2.txt --debug      # Solve with CSP debug info")
+        print("  python main.py ProgIIIG1-Act08-567890-Board.txt  # Solve hard puzzle")
+        print()
+        print("Available puzzle files:")
+        print("  - kakuru1.txt                     (High difficulty)")
+        print("  - kakuru2.txt                     (Very High difficulty)")
+        print("  - ProgIIIG1-Act08-567890-Board.txt  (Hard difficulty)")
+        print("  - ProgIIIG1-Act08-111213-Board.txt  (Expert difficulty)")
