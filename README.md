@@ -233,8 +233,6 @@ python main.py kakuru1.txt
 # Con información de debug mostrando pasos CSP
 python main.py kakuru2.txt --debug
 
-# Diferentes niveles de dificultad
-python main.py ProgIIIG1-Act08-567890-Board.txt
 ```
 
 ### Uso Programático
@@ -263,16 +261,6 @@ solve_kakuro("kakuru2.txt", debug=True)
    - **Dificultad**: Muy Alta
    - **Variables**: ~60 celdas vacías
    - **Restricciones**: Red de restricciones compleja
-
-3. **ProgIIIG1-Act08-567890-Board.txt** - Puzzle desafiante (grilla 8x7)
-   - **Dificultad**: Difícil
-   - **Variables**: ~25 celdas vacías
-   - **Restricciones**: Satisfacción de restricciones ajustada
-
-4. **ProgIIIG1-Act08-111213-Board.txt** - Puzzle experto (grilla 10x8)
-   - **Dificultad**: Experto
-   - **Variables**: ~35 celdas vacías
-   - **Restricciones**: Problema altamente restringido
 
 ---
 
