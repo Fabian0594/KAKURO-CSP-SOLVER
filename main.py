@@ -14,7 +14,6 @@ CSP PROBLEM MODELING:
   3. Domain constraint: Each cell must contain exactly one digit (1-9)
 
 CSP TECHNIQUES IMPLEMENTED:
-- Memoization for recursive calculation optimization
 - Constraint propagation (forward checking and arc consistency)
 - Chronological backtracking with intelligent pruning
 - Variable ordering heuristics (most constrained variable first)
@@ -22,9 +21,9 @@ CSP TECHNIQUES IMPLEMENTED:
 - Early inconsistency detection
 
 PERFORMANCE OPTIMIZATIONS:
-- Exponential reduction through memoization
 - Effective pruning via constraint propagation
 - Smart heuristics for improved average-case performance
+- Early conflict detection
 """
 
 import math
@@ -36,27 +35,6 @@ import os
 # Remove the Google Colab import since we're running locally
 # from google.colab import files
 
-class Memoize:
-    """
-    Memoization decorator for CSP optimization.
-    
-    Stores previously computed results to avoid recalculation of identical
-    subproblems. Critical for performance in complex CSP solving where
-    the same constraint combinations appear repeatedly.
-    
-    This is particularly important for Kakuro where the same sum-target
-    combinations with the same number of variables occur frequently.
-    """
-    def __init__(self, f):
-        self.f = f
-        self.memo = {}
-
-    def __call__(self, *args):
-        if not args in self.memo:
-            self.memo[args] = self.f(*args)
-        return self.memo[args]
-
-@Memoize
 def get_sums(target, count):
     """
     CSP CONSTRAINT GENERATION ENGINE
@@ -96,7 +74,6 @@ def get_sums(target, count):
     return sums
 
 
-@Memoize
 def get_unique_sums(target, count):
     """
     CSP DOMAIN OPTIMIZATION

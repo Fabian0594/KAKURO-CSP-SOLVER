@@ -53,9 +53,9 @@ Este proyecto implementa un resolutor completo de puzzles Kakuro utilizando téc
 - **Heurística de Grado**: Considera primero variables con más restricciones
 
 ### 4. Optimizaciones de Rendimiento
-- **Memoización**: Almacena resultados para combinaciones de suma repetidas
 - **Preprocesamiento**: Generación temprana de combinaciones válidas
 - **Poda de Dominio**: Eliminación temprana de valores imposibles
+- **Detección Temprana**: Identificación de conflictos antes de búsqueda completa
 
 ---
 
@@ -114,7 +114,6 @@ class Run(object):
 
 #### Generación de Dominio
 ```python
-@Memoize
 def get_sums(target, count):
     """
     GENERACIÓN DE RESTRICCIONES: 
@@ -124,7 +123,6 @@ def get_sums(target, count):
     Esto implementa generación dinámica de restricciones para el CSP.
     """
 
-@Memoize
 def get_unique_sums(target, count):
     """
     OPTIMIZACIÓN DE DOMINIO:
@@ -195,9 +193,9 @@ if len(self.solution) == len(self.horizontal_runs):
 - **Complejidad Espacial**: O(n×m) donde m = tamaño máximo de dominio
 
 ### Optimizaciones Aplicadas
-- **Reducción Exponencial**: Memoización reduce recálculos
 - **Poda Efectiva**: Propagación elimina ramas inválidas tempranamente
 - **Heurísticas Inteligentes**: Ordenamiento inteligente mejora tiempo promedio
+- **Detección Temprana**: Conflictos identificados antes de búsqueda completa
 
 ---
 
@@ -351,8 +349,8 @@ def _test(self, value_set):
 - ✅ **Validación de optimización de rendimiento**
 
 ### Métricas de Rendimiento:
-- **Tiempo promedio de resolución**: < 2 segundos para la mayoría de puzzles
-- **Uso de memoria**: Optimizado con memoización
+- **Tiempo promedio de resolución**: < 5 segundos para la mayoría de puzzles
+- **Uso de memoria**: Eficiente con estructuras optimizadas
 - **Tasa de éxito**: 100% en puzzles bien formados
 
 ---
@@ -364,7 +362,7 @@ def _test(self, value_set):
 2. **Reducción de Dominio**: Eliminación progresiva de valores imposibles
 3. **Propagación de Restricciones**: Forward checking y consistencia de arco
 4. **Terminación Temprana**: Detección de conflictos antes de búsqueda completa
-5. **Memoización**: Cache para soluciones de subproblemas repetidos
+5. **Poda Inteligente**: Eliminación de ramas inválidas en el árbol de búsqueda
 
 ### Características de Calidad del Código
 - **Documentación Integral**: Cada técnica CSP explicada
